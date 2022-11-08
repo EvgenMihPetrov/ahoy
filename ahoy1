@@ -1,73 +1,38 @@
 using System;
 using NUnit.Framework;
-public class PrimeGenerator
+[TestFixture]
+public class GeneratePrimesTest
 {
- private static bool[] crossedOut;
- private static int[] result;
- public static int[] GeneratePrimeNumbers(int maxValue)
+ [Test]
+ public void TestPrimes()
  {
- if (maxValue < 2)
- return new int[0];
- else
- {
- UncrossIntegersUpTo(maxValue);
- CrossOutMultiples();
- PutUncrossedIntegersIntoResult();
- return result;
+ int[] nullArray = PrimeGenerator.GeneratePrimeNumbers(0);
+ Assert.AreEqual(nullArray.Length, 0);
+ int[] minArray = PrimeGenerator.GeneratePrimeNumbers(2);
+ Assert.AreEqual(minArray.Length, 1);
+ Assert.AreEqual(minArray[0], 2);
+ int[] threeArray = PrimeGenerator.GeneratePrimeNumbers(3);
+ Assert.AreEqual(threeArray.Length, 2);
+ Assert.AreEqual(threeArray[0], 2);
+ Assert.AreEqual(threeArray[1], 3);
+ int[] centArray = PrimeGenerator.GeneratePrimeNumbers(100);
+ Assert.AreEqual(centArray.Length, 25);
+ Assert.AreEqual(centArray[24], 97);
  }
- }
- private static void UncrossIntegersUpTo(int maxValue)
+ [Test]
+ public void TestExhaustive()
  {
- crossedOut = new bool[maxValue + 1];
- for (int i = 2; i < crossedOut.Length; i++)
- crossedOut[i] = false;
+ for (int i = 2; i<500; i++)
+ VerifyPrimeList(PrimeGenerator.GeneratePrimeNumbers(i));
  }
- private static void PutUncrossedIntegersIntoResult()
+ private void VerifyPrimeList(int[] list)
  {
- result = new int[NumberOfUncrossedIntegers()];
- for (int j = 0, i = 2; i < crossedOut.Length; i++)
- {
- if (NotCrossed(i))
- result[j++] = i;
+ for (int i=0; i<list.Length; i++)
+ VerifyPrime(list[i]);
  }
- }
- private static int NumberOfUncrossedIntegers()
+ private void VerifyPrime(int n)
  {
- int count = 0;
- for (int i = 2; i < crossedOut.Length; i++)
- {
- if (NotCrossed(i))
- count++; // увеличить счетчик
- }
- return count;
- }
- private static void CrossOutMultiples()
- {
- int limit = DetermineIterationLimit();
- for (int i = 2; i <= limit; i++)
- {
- if(NotCrossed(i))
- CrossOutputMultiplesOf(i);
- }
- }
- private static int DetermineIterationLimit()
- {
- // У каждого составного числа в этом массиве есть простой
- // множитель, меньший или равный квадратному корню из размера
- // массива, поэтому необязательно вычеркивать кратные, большие
- // корня.
- double iterationLimit = Math.Sqrt(crossedOut.Length);
- return (int) iterationLimit;
- }
- private static void CrossOutputMultiplesOf(int i)
- {
- for (int multiple = 2*i;
- multiple < crossedOut.Length;
- multiple += i)
- crossedOut[multiple] = true;
- }
- private static bool NotCrossed(int i)
- {
- return crossedOut[i] == false;
+ for (int factor=2; factor<n; factor++)
+ Assert.IsTrue(n%factor != 0);
  }
 }
